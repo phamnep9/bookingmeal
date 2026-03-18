@@ -3,222 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Đặt Cơm Nội Bộ - Login Version</title>
+    <title>Hệ Thống Đặt Cơm</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .sticky-col { position: sticky; left: 0; background-color: white; z-index: 10; border-right: 2px solid #e2e8f0; }
-        input[type="radio"] { width: 1.25rem; height: 1.25rem; cursor: pointer; accent-color: #16a34a; }
+        input[type="radio"]:disabled { cursor: not-allowed; opacity: 0.3; }
+        select:disabled { cursor: not-allowed; background-color: #f3f4f6; color: #9ca3af; }
+        .row-disabled { background-color: #f9fafb; color: #9ca3af; }
         .loading-dots:after { content: ' .'; animation: dots 1s steps(5, end) infinite;}
         @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); } 40% { color: #3b82f6; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); } 60% { text-shadow: .25em 0 0 #3b82f6, .5em 0 0 rgba(0,0,0,0); } 80%, 100% { text-shadow: .25em 0 0 #3b82f6, .5em 0 0 #3b82f6; } }
-        .menu-cell { transition: all 0.2s; cursor: pointer; }
-        .menu-cell:active { background-color: #f0fdf4; }
+        .shift-select { font-size: 11px; font-weight: bold; border: 1px solid #d1d5db; border-radius: 6px; padding: 2px; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body class="bg-slate-100 p-2 md:p-6 font-sans">
     <div class="max-w-4xl mx-auto">
         
         <div id="loginScreen" class="bg-white p-6 md:p-10 rounded-2xl shadow-2xl border-t-8 border-blue-600 text-center max-w-md mx-auto mt-10">
-            <h2 class="text-3xl font-black text-blue-700 mb-2">🥗 ĐẶT CƠM</h2>
-            <p class="text-gray-500 mb-8 uppercase text-xs font-bold tracking-widest">Đăng nhập hệ thống</p>
-            
-            <div class="space-y-4">
-                <div class="text-left">
+            <h2 class="text-3xl font-black text-blue-700 mb-2">🥗 HỆ THỐNG ĐẶT CƠM</h2>
+			<h2 class="text-3xl font-black text-blue-700 mb-2">A&E</h2>
+            <div class="space-y-4 text-left">
+                <div>
                     <label class="block text-xs font-bold text-gray-400 mb-1 ml-1">MÃ SỐ NHÂN VIÊN</label>
-                    <input type="text" id="loginMsnv" placeholder="Ví dụ: AE001" 
-                           class="w-full border-2 border-gray-100 p-4 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none font-bold transition-all">
+                    <input type="text" id="loginMsnv" placeholder="Ví dụ: AE001" class="w-full border-2 border-gray-100 p-4 rounded-xl focus:border-blue-500 outline-none font-bold transition-all">
                 </div>
-                <div class="text-left">
+                <div>
                     <label class="block text-xs font-bold text-gray-400 mb-1 ml-1">MẬT KHẨU</label>
-                    <input type="password" id="loginPw" placeholder="••••••••" 
-                           class="w-full border-2 border-gray-100 p-4 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all">
+                    <input type="password" id="loginPw" placeholder="••••••••" class="w-full border-2 border-gray-100 p-4 rounded-xl focus:border-blue-500 outline-none transition-all">
                 </div>
-                <button onclick="handleLogin()" id="btnLogin" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-black text-lg shadow-lg transform active:scale-[0.98] transition-all duration-150">
-                    XÁC NHẬN ĐĂNG NHẬP
-                </button>
+                <button onclick="handleLogin()" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-black text-lg shadow-lg transform active:scale-[0.98] transition-all">XÁC NHẬN ĐĂNG NHẬP</button>
             </div>
         </div>
 
         <div id="loadingOverlay" class="hidden text-center py-12 bg-white rounded-2xl shadow-xl">
-            <div class="inline-block p-4 bg-blue-50 rounded-full mb-4">
-                <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            </div>
-            <p class="text-blue-600 font-bold text-lg loading-dots">Đang tải thực đơn</p>
+            <p class="text-blue-600 font-bold text-lg loading-dots">Đang đồng bộ thực đơn & thời gian</p>
         </div>
 
         <div id="orderForm" class="hidden animate-fade-in bg-white p-4 md:p-8 rounded-2xl shadow-2xl border-t-8 border-green-600">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-green-50 p-4 rounded-xl border border-green-100 gap-4">
                 <div class="text-center md:text-left">
-                    <p class="text-xs text-green-600 font-bold uppercase tracking-tight">Nhân viên đăng ký:</p>
+                    <p class="text-xs text-green-600 font-bold uppercase">Nhân viên:</p>
                     <p class="text-xl font-black text-gray-800"><span id="displayName"></span> (<span id="displayDept"></span>)</p>
                 </div>
-                <button onclick="location.reload()" class="text-xs font-bold bg-white text-red-500 border border-red-100 px-4 py-2 rounded-lg hover:bg-red-50 transition-all">ĐĂNG XUẤT</button>
+                <div class="flex flex-col items-end">
+                    <button onclick="location.reload()" class="text-xs font-bold text-red-500 mb-1">ĐĂNG XUẤT</button>
+                    <p class="text-[10px] text-gray-400 italic font-medium">Chốt 15h hôm trước & 9h hôm nay</p>
+                </div>
             </div>
 
-            <input type="hidden" id="name">
-            <input type="hidden" id="empId">
-            <input type="hidden" id="department">
-
-            <div class="mb-8 max-w-xs mx-auto md:mx-0">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Khung giờ ăn (5 Ca)</label>
-                <select id="shift" class="w-full border-2 border-blue-100 p-3 rounded-xl focus:border-blue-500 outline-none bg-blue-50 font-bold text-blue-700 appearance-none cursor-pointer text-center">
-                    <option value="09:30 - 12:15">Ca 1: 09:30 - 12:15</option>
-                    <option value="13:30 - 15:00">Ca 2: 13:30 - 15:00</option>
-                    <option value="17:30 - 19:00">Ca 3: 17:30 - 19:00</option>
-                    <option value="21:30 - 23:00">Ca 4: 21:30 - 23:00</option>
-                    <option value="01:30 - 03:00">Ca 5: 01:30 - 03:00</option>
-                </select>
-            </div>
+            <input type="hidden" id="name"><input type="hidden" id="empId"><input type="hidden" id="department">
 
             <div class="overflow-x-auto border rounded-2xl shadow-sm mb-8">
-                <table class="w-full text-sm text-left border-collapse">
+                <table class="w-full text-[13px] text-left border-collapse">
                     <thead class="bg-green-600 text-white text-center">
                         <tr>
-                            <th class="px-4 py-4 sticky-col font-bold">Thứ</th>
-                            <th class="px-2 py-4">Mặn 🍖</th>
-                            <th class="px-2 py-4">Chay 🥦</th>
-                            <th class="px-2 py-4">Âu 🍝</th>
-                            <th class="px-2 py-4 text-red-200">Hủy</th>
+                            <th class="px-2 py-4 sticky-col font-bold">Thứ / Ngày</th>
+                            <th class="px-1 py-4">Mặn 🍖</th>
+                            <th class="px-1 py-4">Chay 🥦</th>
+                            <th class="px-1 py-4">Âu 🍝</th>
+                            <th class="px-2 py-4">Chọn Ca</th>
+                            <th class="px-1 py-4 text-red-200">Xóa</th>
                         </tr>
                     </thead>
                     <tbody id="menuTableBody" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
 
-            <button onclick="sendData()" id="btnSubmit" class="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-2xl font-black text-xl shadow-xl transform active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-3">
-                <span>XÁC NHẬN ĐẶG KÝ</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+            <button onclick="sendData()" id="btnSubmit" class="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-2xl font-black text-xl shadow-xl transform active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                XÁC NHẬN ĐĂNG KÝ
             </button>
         </div>
 
         <div id="status" class="hidden text-center p-10 mt-4 bg-yellow-50 rounded-2xl border-2 border-dashed border-yellow-300">
-            <div class="animate-bounce mb-3 text-4xl">🚀</div>
-            <p class="text-yellow-700 font-bold text-lg">Đang gửi đơn lên hệ thống...</p>
+            <p class="text-yellow-700 font-bold text-lg animate-pulse">Đang gửi dữ liệu chốt sổ...</p>
         </div>
     </div>
 
 <script>
-    // Link Web App của bạn
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNNy6bysT_Rxkg8SFMTCe1LFrkyDj5UBoyvV-mhMW6hg5AUAtiYQOGUXqI8o9MAYwA/exec";
     const dayIds = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+    const shiftOptions = `<option value="Ca 1">Ca 1</option><option value="Ca 2">Ca 2</option><option value="Ca 3">Ca 3</option><option value="Ca 4">Ca 4</option><option value="Ca 5">Ca 5</option>`;
 
-    // HÀM XỬ LÝ ĐĂNG NHẬP
-    function handleLogin() {
-        const ms = document.getElementById('loginMsnv').value.trim();
-        const pw = document.getElementById('loginPw').value.trim();
-        
-        if(!ms || !pw) {
-            alert("⚠️ Vui lòng nhập đầy đủ Mã số và Mật khẩu!");
-            return;
+    // Lấy danh sách ngày dựa trên logic đặt trước
+    function getWeekData() {
+        const now = new Date();
+        const dayOfWeek = now.getDay(); 
+        const diffToMon = now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+        const startOfWeek = new Date(new Date().setDate(diffToMon));
+
+        // Nếu là T6, T7, CN -> Mặc định đặt cho tuần sau
+        if (dayOfWeek >= 5 || dayOfWeek === 0) {
+            startOfWeek.setDate(startOfWeek.getDate() + 7);
         }
 
-        document.getElementById('btnLogin').innerText = "⏳ Đang kiểm tra...";
-        document.getElementById('btnLogin').disabled = true;
-
-        // Gọi API login
-        fetch(`${WEB_APP_URL}?action=login&msnv=${ms}&pw=${pw}`)
-        .then(res => res.json())
-        .then(user => {
-            if(user.success) {
-                // Điền dữ liệu vào form ẩn
-                document.getElementById('name').value = user.name;
-                document.getElementById('empId').value = ms;
-                document.getElementById('department').value = user.dept;
-                
-                // Hiển thị giao diện người dùng
-                document.getElementById('displayName').innerText = user.name;
-                document.getElementById('displayDept').innerText = user.dept;
-                
-                // Chuyển màn hình
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('loadingOverlay').classList.remove('hidden');
-                
-                // Tải Menu sau khi login thành công
-                loadMenu();
-            } else {
-                alert("❌ Mã nhân viên hoặc mật khẩu không đúng!");
-                document.getElementById('btnLogin').innerText = "XÁC NHẬN ĐĂNG NHẬP";
-                document.getElementById('btnLogin').disabled = false;
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Lỗi kết nối server đăng nhập!");
-            document.getElementById('btnLogin').innerText = "XÁC NHẬN ĐĂNG NHẬP";
-            document.getElementById('btnLogin').disabled = false;
+        return dayIds.map((_, i) => {
+            const d = new Date(startOfWeek);
+            d.setDate(startOfWeek.getDate() + i);
+            d.setHours(0,0,0,0);
+            return {
+                obj: d,
+                display: d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+            };
         });
     }
 
-    // HÀM TẢI THỰC ĐƠN
+    // Kiểm tra trạng thái Khóa của ngày
+    function getLockStatus(targetDate) {
+        const now = new Date();
+        const today = new Date(); today.setHours(0,0,0,0);
+        
+        // Quá khứ: Khóa
+        if (targetDate < today) return "Hết hạn";
+
+        // Hôm nay: Khóa sau 9h sáng
+        if (targetDate.getTime() === today.getTime()) {
+            if (now.getHours() >= 9) return "Đang nấu";
+            return false;
+        }
+
+        // Ngày mai: Khóa sau 15h hôm nay
+        const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+        if (targetDate.getTime() === tomorrow.getTime()) {
+            if (now.getHours() >= 15) return "Đã chốt";
+        }
+
+        return false;
+    }
+
+    function handleLogin() {
+        const ms = document.getElementById('loginMsnv').value.trim();
+        const pw = document.getElementById('loginPw').value.trim();
+        if(!ms || !pw) return alert("Nhập đủ mã số và mật khẩu!");
+
+        document.getElementById('btnLogin').innerText = "⏳ Đang xác thực...";
+        fetch(`${WEB_APP_URL}?action=login&msnv=${ms}&pw=${pw}`)
+        .then(res => res.json()).then(user => {
+            if(user.success) {
+                document.getElementById('name').value = user.name;
+                document.getElementById('empId').value = ms;
+                document.getElementById('department').value = user.dept;
+                document.getElementById('displayName').innerText = user.name;
+                document.getElementById('displayDept').innerText = user.dept;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('loadingOverlay').classList.remove('hidden');
+                loadMenu();
+            } else {
+                alert("❌ Sai thông tin đăng nhập!");
+                document.getElementById('btnLogin').innerText = "XÁC NHẬN ĐĂNG NHẬP";
+            }
+        });
+    }
+
     function loadMenu() {
-        fetch(WEB_APP_URL)
-        .then(res => res.json())
-        .then(menuData => {
+        const weekData = getWeekData();
+        fetch(WEB_APP_URL).then(res => res.json()).then(menuData => {
             const tableBody = document.getElementById('menuTableBody');
             tableBody.innerHTML = ""; 
-            
             menuData.forEach((day, index) => {
                 const id = dayIds[index];
-                const row = `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-5 font-black text-gray-700 sticky-col bg-gray-50/80 text-center">${day.label || ''}</td>
-                        <td class="px-2 py-4 text-center menu-cell">
-                            <label class="flex flex-col items-center cursor-pointer gap-2">
-                                <input type="radio" name="${id}" value="Mặn">
-                                <span class="text-[11px] leading-tight text-gray-600 font-medium px-1">${day.meat || '-'}</span>
-                            </label>
+                const dateInfo = weekData[index];
+                const lockMsg = getLockStatus(dateInfo.obj);
+                const isDisabled = lockMsg ? "disabled" : "";
+
+                tableBody.innerHTML += `
+                    <tr class="${lockMsg ? 'row-disabled' : 'hover:bg-gray-50'} transition-colors">
+                        <td class="px-2 py-4 sticky-col bg-inherit text-center">
+                            <div class="font-black text-gray-700">${day.label}</div>
+                            <div class="text-[10px] text-blue-600 font-bold">${dateInfo.display}</div>
+                            ${lockMsg ? `<span class="text-[8px] bg-red-100 text-red-600 px-1 rounded font-bold uppercase">${lockMsg}</span>` : ''}
                         </td>
-                        <td class="px-2 py-4 text-center menu-cell">
-                            <label class="flex flex-col items-center cursor-pointer gap-2">
-                                <input type="radio" name="${id}" value="Chay">
-                                <span class="text-[11px] leading-tight text-gray-600 font-medium px-1">${day.veg || '-'}</span>
-                            </label>
+                        ${['meat','veg','west'].map((m, i) => `
+                            <td class="px-1 py-4 text-center">
+                                <label class="flex flex-col items-center gap-1 cursor-pointer">
+                                    <input type="radio" name="${id}" value="${['Mặn','Chay','Âu'][i]}" ${isDisabled}>
+                                    <span class="text-[10px] text-gray-400">${day[m] || '-'}</span>
+                                </label>
+                            </td>
+                        `).join('')}
+                        <td class="px-1 py-4">
+                            <select id="shift_${id}" class="shift-select" ${isDisabled}>${shiftOptions}</select>
                         </td>
-                        <td class="px-2 py-4 text-center menu-cell">
-                            <label class="flex flex-col items-center cursor-pointer gap-2">
-                                <input type="radio" name="${id}" value="Âu">
-                                <span class="text-[11px] leading-tight text-gray-600 font-medium px-1">${day.west || '-'}</span>
-                            </label>
-                        </td>
-                        <td class="px-2 py-4 text-center">
-                            <button type="button" onclick="clearChoice('${id}')" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-50 text-red-300 hover:text-red-500 transition-all">✕</button>
+                        <td class="px-1 py-4 text-center">
+                            <button type="button" onclick="clearChoice('${id}')" class="text-red-300 hover:text-red-500" ${isDisabled}>✕</button>
                         </td>
                     </tr>`;
-                tableBody.innerHTML += row;
             });
             document.getElementById('loadingOverlay').classList.add('hidden');
             document.getElementById('orderForm').classList.remove('hidden');
-        })
-        .catch(err => {
-            alert("Lỗi tải thực đơn!");
         });
     }
 
     function clearChoice(id) {
-        const radios = document.getElementsByName(id);
-        radios.forEach(r => r.checked = false);
+        document.getElementsByName(id).forEach(r => r.checked = false);
     }
 
-    // HÀM GỬI DỮ LIỆU ĐĂNG KÝ
     function sendData() {
         const results = {
             name: document.getElementById('name').value,
             empId: document.getElementById('empId').value,
             department: document.getElementById('department').value,
-            shift: document.getElementById('shift').value
+            shift: "Xoay Ca" 
         };
         
         let count = 0;
         dayIds.forEach(id => {
-            const selected = document.querySelector(`input[name="${id}"]:checked`);
-            results[id] = selected ? selected.value : "NGHỈ";
-            if (selected) count++;
+            const input = document.querySelector(`input[name="${id}"]`);
+            if (input.disabled) {
+                results[id] = "KEEP_OLD"; // Giữ nguyên dữ liệu cũ cho ngày đã khóa
+            } else {
+                const selected = document.querySelector(`input[name="${id}"]:checked`);
+                const shiftVal = document.getElementById(`shift_${id}`).value;
+                results[id] = selected ? `${selected.value} (${shiftVal})` : "NGHỈ";
+                if (selected) count++;
+            }
         });
-
-        if (count === 0) {
-            alert("⚠️ Bạn chưa chọn món cho ngày nào cả!");
-            return;
-        }
 
         document.getElementById('orderForm').classList.add('hidden');
         document.getElementById('status').classList.remove('hidden');
@@ -226,15 +223,12 @@
         fetch(WEB_APP_URL, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify(results)
-        })
-        .then(() => {
-            alert("✅ Đăng ký thành công cho " + results.name);
+        }).then(() => {
+            alert("✅ Đã cập nhật đăng ký thành công!");
             location.reload();
-        })
-        .catch(() => {
-            alert("✅ Hệ thống đã tiếp nhận đơn của bạn!");
+        }).catch(() => {
+            alert("✅ Đã ghi nhận đơn hàng!");
             location.reload();
         });
     }
